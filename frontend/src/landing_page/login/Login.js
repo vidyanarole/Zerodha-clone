@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { BACKEND_URL } from '../../config';
+import { BACKEND_URL, DASHBOARD_URL } from '../../config';
 
-function Signup() {
+function Login() {
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: ''
   });
@@ -29,14 +28,20 @@ function Signup() {
     setSuccessMsg('');
 
     try {
-      const response = await axios.post(`${BACKEND_URL}/signup`, formData);
-      setSuccessMsg(response.data.message);
-      setFormData({ name: '', email: '', password: '' }); // Clear form on success
+      const response = await axios.post(`${BACKEND_URL}/login`, formData);
+      setSuccessMsg("Login successful! Redirecting to dashboard...");
+      
+      const { token } = response.data;
+      
+      // Perform cross-app authentication redirect handshake
+      setTimeout(() => {
+        window.location.href = `${DASHBOARD_URL}?token=${token}`;
+      }, 1000);
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         setErrorMsg(err.response.data.message);
       } else {
-        setErrorMsg('Something went wrong. Please try again.');
+        setErrorMsg('Invalid email or password. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -48,25 +53,15 @@ function Signup() {
       <div className="row justify-content-center">
         <div className="col-md-6 col-lg-5">
           <div className="card shadow-sm p-4">
-            <h2 className="text-center mb-4">Signup</h2>
+            <div className="text-center mb-4">
+              <img src="media/images/logo.svg" style={{ width: "20%" }} alt="Kite Logo" className="mb-2" />
+              <h2>Login to Kite</h2>
+            </div>
             
             {successMsg && <div className="alert alert-success">{successMsg}</div>}
             {errorMsg && <div className="alert alert-danger">{errorMsg}</div>}
- 
+
             <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label htmlFor="name" className="form-label">Full Name</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="name"
-                  name="name"
-                  placeholder="Enter your full name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
               <div className="mb-3">
                 <label htmlFor="email" className="form-label">Email address</label>
                 <input
@@ -87,7 +82,7 @@ function Signup() {
                   className="form-control"
                   id="password"
                   name="password"
-                  placeholder="Create a password"
+                  placeholder="Enter password"
                   value={formData.password}
                   onChange={handleChange}
                   required
@@ -96,15 +91,15 @@ function Signup() {
               <button 
                 type="submit" 
                 className="btn btn-primary w-100 mt-3" 
-                style={{ backgroundColor: '#387ed1', border: 'none' }}
+                style={{ backgroundColor: '#f56834', border: 'none' }}
                 disabled={loading}
               >
-                {loading ? 'Signing up...' : 'Sign Up'}
+                {loading ? 'Logging in...' : 'Login'}
               </button>
             </form>
             <div className="mt-3 text-center">
               <small className="text-muted">
-                Already have an account? <Link to="/login" style={{ color: '#387ed1', textDecoration: 'none' }}>Log in</Link>
+                Don't have an account? <Link to="/signup" style={{ color: '#f56834', textDecoration: 'none' }}>Sign up</Link>
               </small>
             </div>
           </div>
@@ -114,4 +109,4 @@ function Signup() {
   );
 }
 
-export default Signup;
+export default Login;

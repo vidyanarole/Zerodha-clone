@@ -7,7 +7,7 @@ import { watchlist } from "../data/data";
 import { BACKEND_URL } from "../config";
 import "./BuyActionWindow.css";
 
-const BuyActionWindow = ({ uid }) => {
+const SellActionWindow = ({ uid }) => {
   const stock = watchlist.find((s) => s.name === uid);
   const initialPrice = stock ? stock.price : 0.0;
 
@@ -17,19 +17,19 @@ const BuyActionWindow = ({ uid }) => {
   const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
   
-  const { closeBuyWindow } = useContext(GeneralContext);
+  const { closeSellWindow } = useContext(GeneralContext);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
-        closeBuyWindow();
+        closeSellWindow();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closeBuyWindow]);
+  }, [closeSellWindow]);
 
-  const handleBuyClick = async () => {
+  const handleSellClick = async () => {
     setErrorMsg("");
     setSuccessMsg("");
     setLoading(true);
@@ -43,7 +43,7 @@ const BuyActionWindow = ({ uid }) => {
           name: uid,
           qty: parseInt(stockQuantity),
           price: parseFloat(stockPrice),
-          mode: "BUY",
+          mode: "SELL",
         },
         {
           headers: {
@@ -54,16 +54,16 @@ const BuyActionWindow = ({ uid }) => {
 
       setSuccessMsg(response.data.message);
       
-      // Close window and reload dashboard stats on success
+      // Close window after a short delay on success
       setTimeout(() => {
-        closeBuyWindow();
-        window.location.reload();
+        closeSellWindow();
+        window.location.reload(); // Reload dashboard stats
       }, 1200);
     } catch (err) {
       if (err.response && err.response.data && err.response.data.message) {
         setErrorMsg(err.response.data.message);
       } else {
-        setErrorMsg("Failed to place buy order. Please try again.");
+        setErrorMsg("Failed to place sell order. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -71,14 +71,14 @@ const BuyActionWindow = ({ uid }) => {
   };
 
   const handleCancelClick = () => {
-    closeBuyWindow();
+    closeSellWindow();
   };
 
   return (
-    <div className="container" id="buy-window" draggable="true" style={{ borderTop: "5px solid #4184f3" }}>
+    <div className="container" id="buy-window" draggable="true" style={{ borderTop: "5px solid #f56834" }}>
       <div className="regular-order">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-          <h4 style={{ margin: 0, color: "#4184f3" }}>Buy {uid}</h4>
+          <h4 style={{ margin: 0, color: "#f56834" }}>Sell {uid}</h4>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ fontSize: "12px", color: "#888" }}>CNC Regular</span>
             <button 
@@ -124,15 +124,15 @@ const BuyActionWindow = ({ uid }) => {
       </div>
 
       <div className="buttons">
-        <span>Margin required: ₹{(stockQuantity * stockPrice).toFixed(2)}</span>
+        <span>Margin credit: ₹{(stockQuantity * stockPrice).toFixed(2)}</span>
         <div>
           <button 
-            className="btn btn-blue" 
-            onClick={handleBuyClick} 
+            className="btn btn-orange" 
+            onClick={handleSellClick} 
             disabled={loading}
             style={{ border: "none", cursor: "pointer" }}
           >
-            {loading ? "Buying..." : "Buy"}
+            {loading ? "Selling..." : "Sell"}
           </button>
           <Link to="" className="btn btn-grey" onClick={handleCancelClick}>
             Cancel
@@ -143,4 +143,4 @@ const BuyActionWindow = ({ uid }) => {
   );
 };
 
-export default BuyActionWindow;
+export default SellActionWindow;

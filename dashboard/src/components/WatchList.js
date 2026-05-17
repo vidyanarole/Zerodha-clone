@@ -1,8 +1,8 @@
-import React, { useState, useContext } from "react";
-
+import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 
 import GeneralContext from "./GeneralContext";
+import { BACKEND_URL } from "../config";
 
 import { Tooltip, Grow } from "@mui/material";
 
@@ -16,62 +16,65 @@ import {
 import { watchlist } from "../data/data";
 import { DoughnutChart } from "./DoughnoutChart";
 
-const labels = watchlist.map((subArray) => subArray["name"]);
-
 const WatchList = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [holdings, setHoldings] = useState([]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    axios.get(`${BACKEND_URL}/allHoldings`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then((res) => {
+      setHoldings(res.data);
+    })
+    .catch((err) => {
+      console.error("Error fetching holdings for watchlist chart:", err);
+    });
+  }, []);
+
+  const filteredWatchlist = watchlist.filter((stock) =>
+    stock.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const holdingsLabels = holdings.length > 0 ? holdings.map((h) => h.name) : ["No Holdings"];
+  const holdingsValues = holdings.length > 0 ? holdings.map((h) => h.qty * h.price) : [1];
+  const holdingsColors = holdings.length > 0 
+    ? [
+        "rgba(255, 99, 132, 0.5)",
+        "rgba(54, 162, 235, 0.5)",
+        "rgba(255, 206, 86, 0.5)",
+        "rgba(75, 192, 192, 0.5)",
+        "rgba(153, 102, 255, 0.5)",
+        "rgba(255, 159, 64, 0.5)",
+      ]
+    : ["rgba(200, 200, 200, 0.3)"];
+    
+  const holdingsBorderColors = holdings.length > 0 
+    ? [
+        "rgba(255, 99, 132, 1)",
+        "rgba(54, 162, 235, 1)",
+        "rgba(255, 206, 86, 1)",
+        "rgba(75, 192, 192, 1)",
+        "rgba(153, 102, 255, 1)",
+        "rgba(255, 159, 64, 1)",
+      ]
+    : ["rgba(200, 200, 200, 1)"];
+
   const data = {
-    labels,
+    labels: holdingsLabels,
     datasets: [
       {
-        label: "Price",
-        data: watchlist.map((stock) => stock.price),
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.5)",
-          "rgba(54, 162, 235, 0.5)",
-          "rgba(255, 206, 86, 0.5)",
-          "rgba(75, 192, 192, 0.5)",
-          "rgba(153, 102, 255, 0.5)",
-          "rgba(255, 159, 64, 0.5)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(153, 102, 255, 1)",
-          "rgba(255, 159, 64, 1)",
-        ],
+        label: holdings.length > 0 ? "Allocation Value" : "Empty portfolio",
+        data: holdingsValues,
+        backgroundColor: holdingsColors,
+        borderColor: holdingsBorderColors,
         borderWidth: 1,
       },
     ],
   };
-
-  // export const data = {
-  //   labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-  // datasets: [
-  //   {
-  //     label: "# of Votes",
-  //     data: [12, 19, 3, 5, 2, 3],
-  //     backgroundColor: [
-  //       "rgba(255, 99, 132, 0.2)",
-  //       "rgba(54, 162, 235, 0.2)",
-  //       "rgba(255, 206, 86, 0.2)",
-  //       "rgba(75, 192, 192, 0.2)",
-  //       "rgba(153, 102, 255, 0.2)",
-  //       "rgba(255, 159, 64, 0.2)",
-  //     ],
-  //     borderColor: [
-  //       "rgba(255, 99, 132, 1)",
-  //       "rgba(54, 162, 235, 1)",
-  //       "rgba(255, 206, 86, 1)",
-  //       "rgba(75, 192, 192, 1)",
-  //       "rgba(153, 102, 255, 1)",
-  //       "rgba(255, 159, 64, 1)",
-  //     ],
-  //     borderWidth: 1,
-  //   },
-  // ],
-  // };
 
   return (
     <div className="watchlist-container">
@@ -80,19 +83,24 @@ const WatchList = () => {
           type="text"
           name="search"
           id="search"
-          placeholder="Search eg:infy, bse, nifty fut weekly, gold mcx"
+          placeholder="Search eg: infy, bse, nifty fut weekly"
           className="search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <span className="counts"> {watchlist.length} / 50</span>
+        <span className="counts"> {filteredWatchlist.length} / 50</span>
       </div>
 
       <ul className="list">
-        {watchlist.map((stock, index) => {
+        {filteredWatchlist.map((stock, index) => {
           return <WatchListItem stock={stock} key={index} />;
         })}
       </ul>
 
-      <DoughnutChart data={data} />
+      <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <h4 style={{ fontSize: "14px", fontWeight: "500", color: "#666", marginBottom: "10px" }}>Portfolio Allocation</h4>
+        <DoughnutChart data={data} />
+      </div>
     </div>
   );
 };
@@ -136,6 +144,10 @@ const WatchListActions = ({ uid }) => {
     generalContext.openBuyWindow(uid);
   };
 
+  const handleSellClick = () => {
+    generalContext.openSellWindow(uid);
+  };
+
   return (
     <span className="actions">
       <span>
@@ -153,6 +165,7 @@ const WatchListActions = ({ uid }) => {
           placement="top"
           arrow
           TransitionComponent={Grow}
+          onClick={handleSellClick}
         >
           <button className="sell">Sell</button>
         </Tooltip>

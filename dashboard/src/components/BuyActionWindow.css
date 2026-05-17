@@ -218,4 +218,16 @@
     background: #9b9b9b;
     color: #fff;
   }
+
+  .sell-header {
+    background: #f56834 !important;
+  }
+
+  .btn-orange {
+    background: #f56834;
+  }
+
+  .btn-orange:hover {
+    background: #ff8554;
+  }
   

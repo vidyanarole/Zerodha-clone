@@ -842,4 +842,119 @@ hr {
   background-color: rgb(212, 212, 212);
 }
 
+/* Profile Dropdown Styles */
+.profile {
+  position: relative;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  padding: 15px;
+  min-width: 180px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: default;
+}
+
+.profile-dropdown .user-info {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 8px;
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.profile-dropdown .user-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.profile-dropdown .user-info .email {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 2px;
+}
+
+.profile-dropdown button {
+  background-color: #f56834;
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.profile-dropdown button:hover {
+  background-color: #df5b2b;
+}
+
+/* Responsive CSS for Mobile, Tablet, and Smaller viewports */
+@media (max-width: 900px) {
+  .dashboard-container {
+    flex-direction: column;
+    height: auto;
+  }
+  .watchlist-container {
+    width: 100% !important;
+    border-right: none;
+    border-bottom: 1px solid #eee;
+    height: 400px;
+    overflow-y: auto;
+  }
+  .content {
+    flex-basis: 100% !important;
+    padding: 20px !important;
+  }
+  .container {
+    width: 90% !important;
+    left: 5% !important;
+    height: auto !important;
+    bottom: 20px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .topbar-container {
+    padding: 0 15px !important;
+  }
+  .indices {
+    display: none !important;
+  }
+  .menu-container {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 5px;
+    scrollbar-width: none;
+  }
+  .menu-container::-webkit-scrollbar {
+    display: none;
+  }
+  .row {
+    flex-direction: column !important;
+    gap: 20px;
+  }
+  .col {
+    flex-basis: 100% !important;
+  }
+  .order-table {
+    overflow-x: auto;
+  }
+  table {
+    min-width: 500px;
+  }
+}
+
 
